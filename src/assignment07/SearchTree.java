@@ -639,23 +639,30 @@ public class SearchTree<E>
      */
     private void updateBalances (Node<E> n)
     {
-        updateHeights(n);
+    	boolean changed = fixHeight(n);
     	
-        int c = subTreeDifference(n);
+        int c = subTreeBalance(n);
         
         if (c < -1)
         {
-        	rightRotation(n);
+        	if (subTreeBalance(n.left) > 0){
+        		n.left = leftRotation(n.left);
+        	}
+        	n = rightRotation(n);
         }
         
         if (c > 1)
         {
-        	leftRotation(n);
+        	if (subTreeBalance(n.right) < 0){
+        		n.right = rightRotation(n.right);
+        	}
+        	n = leftRotation(n);
         }
         
-        if (n.parent != null){
+        if(changed){
         	updateBalances(n.parent);
         }
+        
     }
 
     /**
@@ -669,29 +676,29 @@ public class SearchTree<E>
      * @return the difference in height between right and left subtrees
      */
     
-    private int subTreeDifference(Node<E> n)
+    private int subTreeBalance(Node<E> n)
     {
-    	int left, right;
+    	if (n == null)
+    	{
+    		return 0;
+    	}
     	
     	if (n.left == null)
     	{
-    		left = -1;
-    	}
-    	else
-    	{
-    		left = n.left.height;
+    		return n.right.height - -1;
     	}
     	
     	if (n.right == null)
     	{
-    		right = -1;
-    	}
-    	else
-    	{
-    		right = n.right.height;
+    		return -1 - n.left.height;
     	}
     	
-    	return right - left;
+    	if (n.right == null && n.left == null)
+    	{
+    		return 0;
+    	}
+    	
+    	return n.right.height - n.left.height;
     }
 
     /**
@@ -730,29 +737,30 @@ public class SearchTree<E>
     		throw new NullPointerException("No right child...");
     	}
     	
-    	// check to see if two rotations are necessary
-    	if(this.subTreeDifference(n.right) < -1)
-    	{
-    		rightRotation(n.right);
-    	}
-    	
     	Node<E> newRoot = n.right;
     	n.right = newRoot.left;
     	newRoot.left = n;
-    	
-    	newRoot.parent = newRoot.left.parent;
-    	if (newRoot.left != null)
-    		newRoot.left.parent = newRoot;
-    	if (newRoot.right != null)
-    		newRoot.right.parent = newRoot;
     	
     	if (newRoot.left == root)
     	{
     		root = newRoot;
     	}
+    	else
+    	{
+    		if (n.parent.right == n)
+    			n.parent.right = newRoot;
+    		if (n.parent.left == n)
+    			n.parent.left = newRoot;
+    	}
     	
-    	//update the height the node and its children. 
-    	updateHeights(n);
+    	newRoot.parent = n.parent;
+    	if (newRoot.left != null)
+    		newRoot.left.parent = newRoot;
+    	if (newRoot.right != null)
+    		newRoot.right.parent = newRoot;
+    	
+    	fixHeight(n);
+    	fixHeight(newRoot);
     	
     	return newRoot;
     }
@@ -787,28 +795,30 @@ public class SearchTree<E>
     		throw new NullPointerException("No left child...");
     	}
     	
-    	// check to see if two rotations are necessary
-    	if(this.subTreeDifference(n.left) > 1)
-    	{
-    		leftRotation(n.left);
-    	}
-    	
     	Node<E> newRoot = n.left;
     	n.left = newRoot.right;
     	newRoot.right = n;
-    	
-    	newRoot.parent = newRoot.right.parent;
-    	if (newRoot.left != null)
-    		newRoot.left.parent = newRoot;
-    	if (newRoot.right != null)
-    		newRoot.right.parent = newRoot;
     	
     	if (newRoot.right == root)
     	{
     		root = newRoot;
     	}
+    	else
+    	{
+    		if (n.parent.left == n)
+    			n.parent.left = newRoot;
+    		if (n.parent.right == n)
+    			n.parent.right = newRoot;
+    	}
     	
-    	updateHeights(n);
+    	newRoot.parent = n.parent;
+    	if (newRoot.left != null)
+    		newRoot.left.parent = newRoot;
+    	if (newRoot.right != null)
+    		newRoot.right.parent = newRoot;
+    	
+    	fixHeight(n);
+    	fixHeight(newRoot);
     	
     	return newRoot;
     }

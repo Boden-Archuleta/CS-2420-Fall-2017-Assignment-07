@@ -54,25 +54,25 @@ public class TestSearchTree {
 //		tree.checkStructure();
 //	}
 
-	@Test
-	public void ensureAVLBehavior(){
-		SearchTree<Integer> tree = new SearchTree<>(new Comparator<Integer>(){
-			public int compare(Integer o1, Integer o2) {
-				return o1.compareTo(o2);
-			}
-		}, true);
-		
-		Integer a = 6;
-		Integer b = 8;
-		Integer c = 9;
-		//Integer d = 1;
-		
-		tree.add(a);
-		tree.add(b);
-		tree.add(c);
-		
-		tree.checkStructure();
-	}
+//	@Test
+//	public void ensureAVLBehavior(){
+//		SearchTree<Integer> tree = new SearchTree<>(new Comparator<Integer>(){
+//			public int compare(Integer o1, Integer o2) {
+//				return o1.compareTo(o2);
+//			}
+//		}, true);
+//		
+//		Integer a = 6;
+//		Integer b = 8;
+//		Integer c = 9;
+//		//Integer d = 1;
+//		
+//		tree.add(a);
+//		tree.add(b);
+//		tree.add(c);
+//		
+//
+//	}
 	
 	@Test 
 	public void stressTest(){
@@ -92,6 +92,5 @@ public class TestSearchTree {
 	    	 System.out.println(val + " added");
 	     }
 	     
-	     tree.checkStructure();
 	}
 }
