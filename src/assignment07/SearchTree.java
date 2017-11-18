@@ -602,22 +602,32 @@ public class SearchTree<E>
      */
     
     private E removeReference(E target, Node<E> current)
-    {
-    	if (target == current.data)
+    {	
+    	if (comparator.compare(target, current.data) == 0)
     	{
-    		this.remove(current);
-    		return target;
+    		if (current.left != null)
+    		{
+	    		E temp = removeReference(target, current.left);
+	    		if (temp != null)
+	    			return temp;
+    		}
+    		
+    		if (target == current.data)
+    			return this.remove(current);
+    		
+    		if (current.right != null)
+    		{
+	    		E temp2 = removeReference(target, current.right);
+	    		if (temp2 != null)
+	    			return temp2;
+    		}
     	}
     	
     	else if (comparator.compare(target, current.data) < 0 && current.left != null)
-    	{
     		return removeReference(target, current.left);
-    	}
     	
     	else if (comparator.compare(target, current.data) > 0 && current.right != null)
-    	{
     		return removeReference(target, current.right);
-    	}
     	
     	 return null;
     }
@@ -639,11 +649,14 @@ public class SearchTree<E>
      */
     private void updateBalances (Node<E> n)
     {
-    	boolean changed = fixHeight(n);
+    	if (n == null)
+    		return;
     	
-        int c = subTreeBalance(n);
+    	Node<E> parent = n.parent;
+    	
+    	boolean changed = fixHeight(n);
         
-        if (c < -1)
+        if (subTreeBalance(n) < -1)
         {
         	if (subTreeBalance(n.left) > 0){
         		n.left = leftRotation(n.left);
@@ -651,7 +664,7 @@ public class SearchTree<E>
         	n = rightRotation(n);
         }
         
-        if (c > 1)
+        if (subTreeBalance(n) > 1)
         {
         	if (subTreeBalance(n.right) < 0){
         		n.right = rightRotation(n.right);
@@ -660,7 +673,7 @@ public class SearchTree<E>
         }
         
         if(changed){
-        	updateBalances(n.parent);
+        	updateBalances(parent);
         }
         
     }
@@ -679,24 +692,16 @@ public class SearchTree<E>
     private int subTreeBalance(Node<E> n)
     {
     	if (n == null)
-    	{
     		return 0;
-    	}
     	
     	if (n.left == null)
-    	{
     		return n.right.height - -1;
-    	}
     	
     	if (n.right == null)
-    	{
     		return -1 - n.left.height;
-    	}
     	
     	if (n.right == null && n.left == null)
-    	{
     		return 0;
-    	}
     	
     	return n.right.height - n.left.height;
     }
@@ -732,34 +737,34 @@ public class SearchTree<E>
      *             if the right child of n is null.
      */
     
-    private Node<E> leftRotation(Node<E> n){
-    	if (n.right == null){
-    		throw new NullPointerException("No right child...");
+    private Node<E> leftRotation(Node<E> oldRoot){
+    	if (oldRoot.right == null){
+    		throw new NullPointerException();
     	}
     	
-    	Node<E> newRoot = n.right;
-    	n.right = newRoot.left;
-    	newRoot.left = n;
+    	Node<E> parent = oldRoot.parent;
+    	Node<E> newRoot = oldRoot.right;
     	
-    	if (newRoot.left == root)
+    	oldRoot.right = newRoot.left;
+    	if (newRoot.left != null)
+    		newRoot.left.parent = oldRoot;
+    	newRoot.left = oldRoot;
+    	oldRoot.parent = newRoot;
+    	
+    	newRoot.parent = parent;
+    	if (parent == null)
     	{
-    		root = newRoot;
+    		this.root = newRoot;
     	}
     	else
     	{
-    		if (n.parent.right == n)
-    			n.parent.right = newRoot;
-    		if (n.parent.left == n)
-    			n.parent.left = newRoot;
+    		if (parent.left == oldRoot)
+    			parent.left = newRoot;
+    		if (parent.right == oldRoot)
+    			parent.right = newRoot;
     	}
     	
-    	newRoot.parent = n.parent;
-    	if (newRoot.left != null)
-    		newRoot.left.parent = newRoot;
-    	if (newRoot.right != null)
-    		newRoot.right.parent = newRoot;
-    	
-    	fixHeight(n);
+    	fixHeight(oldRoot);
     	fixHeight(newRoot);
     	
     	return newRoot;
@@ -790,34 +795,34 @@ public class SearchTree<E>
      *             if the right child of n is null.
      */
     
-    private Node<E> rightRotation(Node<E> n){
-    	if (n.left == null){
-    		throw new NullPointerException("No left child...");
+    private Node<E> rightRotation(Node<E> oldRoot){
+    	if (oldRoot.left == null){
+    		throw new NullPointerException();
     	}
     	
-    	Node<E> newRoot = n.left;
-    	n.left = newRoot.right;
-    	newRoot.right = n;
+    	Node<E> parent = oldRoot.parent;
+    	Node<E> newRoot = oldRoot.left;
     	
-    	if (newRoot.right == root)
+    	oldRoot.left = newRoot.right;
+    	if (newRoot.right != null)
+    		newRoot.right.parent = oldRoot;
+    	newRoot.right = oldRoot;
+    	oldRoot.parent = newRoot;
+    	
+    	newRoot.parent = parent;
+    	if (parent == null)
     	{
-    		root = newRoot;
+    		this.root = newRoot;
     	}
     	else
     	{
-    		if (n.parent.left == n)
-    			n.parent.left = newRoot;
-    		if (n.parent.right == n)
-    			n.parent.right = newRoot;
+    		if (parent.left == oldRoot)
+    			parent.left = newRoot;
+    		if (parent.right == oldRoot)
+    			parent.right = newRoot;
     	}
     	
-    	newRoot.parent = n.parent;
-    	if (newRoot.left != null)
-    		newRoot.left.parent = newRoot;
-    	if (newRoot.right != null)
-    		newRoot.right.parent = newRoot;
-    	
-    	fixHeight(n);
+    	fixHeight(oldRoot);
     	fixHeight(newRoot);
     	
     	return newRoot;
